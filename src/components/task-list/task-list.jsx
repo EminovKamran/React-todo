@@ -18,10 +18,11 @@ export default class TaskList extends Component {
         <li key={item.id} className={item.state}>
           <Task
             {...itemsProps}
+            id={id}
             onToggleStatus={() => onToggleStatus(id)}
             onDeleted={() => onDeleted(id)}
             onEdit={() => onEdit(id)}
-            useEditTask={(e) => useEditTask(e, id)}
+            useEditTask={useEditTask}
             description={description || this.props.description}
           />
         </li>

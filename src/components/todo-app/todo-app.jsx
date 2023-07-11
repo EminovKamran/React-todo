@@ -123,10 +123,8 @@ export default class TodoApp extends Component {
     });
   };
 
-  useEditTask = (e, id) => {
-    e.preventDefault();
-
-    this.setState(({ todoData, newLabel }) => {
+  useEditTask = (id, newLabel) => {
+    this.setState(({ todoData }) => {
       const updateLabel = todoData.map((elem) => {
         if (elem.id === id) {
           return {

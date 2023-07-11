@@ -16,6 +16,14 @@ export default class Task extends Component {
     const { name, value } = e.target;
     this.setState({ [name]: value });
   };
+  
+  onTaskEdit = (e) => {
+    const { id, useEditTask } = this.props;
+    const { newLabel } = this.state;
+
+    e.preventDefault();
+    useEditTask(id, newLabel);
+  };
 
   render() {
     const {
@@ -25,7 +33,6 @@ export default class Task extends Component {
       onDeleted,
       createDate,
       onEdit,
-      useEditTask,
     } = this.props;
 
     return (
@@ -57,7 +64,7 @@ export default class Task extends Component {
             onClick={onDeleted}
           />
         </div>
-        <form onSubmit={useEditTask}>
+        <form onSubmit={this.onTaskEdit}>
           {state === 'editing' ? (
             <input
               type='text'
