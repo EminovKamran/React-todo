@@ -1,6 +1,7 @@
-// eslint-disable-next-line no-unused-vars
 import React, { Component } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+
+import TaskTimer from '../task-timer';
 
 import './task.css';
 
@@ -33,6 +34,10 @@ export default class Task extends Component {
       onDeleted,
       createDate,
       onEdit,
+      min,
+      sec,
+      startTimer,
+      stopTimer,
     } = this.props;
 
     return (
@@ -45,7 +50,15 @@ export default class Task extends Component {
             onClick={onToggleStatus}
           />
           <label>
-            <span className='description'>{description}</span>
+            <span className='title'>{description}</span>
+            <span className='description'>
+              <TaskTimer
+                startTimer={startTimer}
+                stopTimer={stopTimer}
+                min={min}
+                sec={sec}
+              />
+            </span>
             <span className='created'>
               created{' '}
               {formatDistanceToNow(createDate, { includeSeconds: true })} ago

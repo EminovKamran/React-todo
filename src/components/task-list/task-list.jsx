@@ -8,8 +8,15 @@ import './task-list.css';
 // eslint-disable-next-line react/prefer-stateless-function
 export default class TaskList extends Component {
   render() {
-    const { todos, onToggleStatus, onDeleted, onEdit, useEditTask } =
-      this.props;
+    const {
+      todos,
+      onToggleStatus,
+      onDeleted,
+      onEdit,
+      useEditTask,
+      startTimer,
+      stopTimer,
+    } = this.props;
 
     const elements = todos.map((item) => {
       const { id, description, ...itemsProps } = item;
@@ -24,6 +31,8 @@ export default class TaskList extends Component {
             onEdit={() => onEdit(id)}
             useEditTask={useEditTask}
             description={description || this.props.description}
+            startTimer={() => startTimer(id)}
+            stopTimer={() => stopTimer(id)}
           />
         </li>
       );

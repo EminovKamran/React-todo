@@ -10,6 +10,8 @@ export default class TodoApp extends Component {
   // eslint-disable-next-line react/no-unused-class-component-methods
   maxId = 10;
 
+  timer;
+
   constructor(props) {
     super(props);
 
@@ -17,8 +19,49 @@ export default class TodoApp extends Component {
       todoData: [],
       filter: 'all',
       label: '',
+      min: '',
+      sec: '',
     };
   }
+
+  componentWillUnmount() {
+    this.stopTimer();
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  stopTimer = () => {
+    clearInterval(this.timer);
+  };
+
+  startTimer = (id) => {
+    this.timer = setInterval(() => {
+      this.setState((prevState) => {
+        const updateTodo = prevState.todoData.map((todoItem) => {
+          if (todoItem.id === id) {
+            let timeLeft = todoItem.sec - 1;
+            let minLeft = todoItem.min;
+            if (minLeft > 0 && timeLeft === 0) {
+              minLeft -= 1;
+              timeLeft = 59;
+            }
+            if (timeLeft === 0 || timeLeft < 0) {
+              timeLeft = 0;
+              this.stopTimer();
+            }
+            return {
+              ...todoItem,
+              sec: timeLeft,
+              min: minLeft,
+            };
+          }
+          return todoItem;
+        });
+        return {
+          todoData: updateTodo,
+        };
+      });
+    }, 1000);
+  };
 
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,12 +69,14 @@ export default class TodoApp extends Component {
   };
 
   // eslint-disable-next-line no-return-assign
-  createTodoItem = (description) => ({
+  createTodoItem = (description, min, sec) => ({
     description,
     state: 'active',
     // eslint-disable-next-line react/no-unused-class-component-methods
     id: (this.maxId += 1),
     createDate: new Date(),
+    min,
+    sec,
   });
 
   // eslint-disable-next-line class-methods-use-this
@@ -63,16 +108,18 @@ export default class TodoApp extends Component {
     });
   };
 
-  addItem = (text) => {
-    const newItem = this.createTodoItem(text);
+  addItem = (text, min, sec) => {
+    if (text.trim()) {
+      const newItem = this.createTodoItem(text, min, sec);
 
-    this.setState(({ todoData }) => {
-      const newArr = [...todoData, newItem];
+      this.setState(({ todoData }) => {
+        const newArr = [...todoData, newItem];
 
-      return {
-        todoData: newArr,
-      };
-    });
+        return {
+          todoData: newArr,
+        };
+      });
+    }
   };
 
   useFilteredTask = (e) => {
@@ -103,10 +150,12 @@ export default class TodoApp extends Component {
 
   useNewTask = (e) => {
     e.preventDefault();
-    const { label } = this.state;
-    this.addItem(label);
+    const { label, min, sec } = this.state;
+    this.addItem(label, min, sec);
     this.setState({
       label: '',
+      min: '',
+      sec: '',
     });
   };
 
@@ -143,7 +192,7 @@ export default class TodoApp extends Component {
   };
 
   render() {
-    const { filter, label, todoData } = this.state;
+    const { filter, label, todoData, min, sec } = this.state;
 
     const todoCount = todoData.filter((el) => el.state === 'active').length;
 
@@ -155,6 +204,8 @@ export default class TodoApp extends Component {
           handleChange={this.handleChange}
           useNewTask={this.useNewTask}
           label={label}
+          min={min}
+          sec={sec}
         />
         <section className='main'>
           <TaskList
@@ -164,6 +215,10 @@ export default class TodoApp extends Component {
             onEdit={this.onEdit}
             useEditTask={this.useEditTask}
             handleChange={this.handleChange}
+            min={min}
+            sec={sec}
+            startTimer={this.startTimer}
+            stopTimer={this.stopTimer}
           />
           <Footer
             useFilteredTask={this.useFilteredTask}
