@@ -21,46 +21,49 @@ export default class TodoApp extends Component {
       label: '',
       min: '',
       sec: '',
+      isPlaying: false,
     };
   }
 
-  componentWillUnmount() {
-    this.stopTimer();
-  }
-
-  // eslint-disable-next-line class-methods-use-this
   stopTimer = () => {
+    this.setState({
+      isPlaying: false,
+    });
     clearInterval(this.timer);
   };
 
   startTimer = (id) => {
-    this.timer = setInterval(() => {
-      this.setState((prevState) => {
-        const updateTodo = prevState.todoData.map((todoItem) => {
-          if (todoItem.id === id) {
-            let timeLeft = todoItem.sec - 1;
-            let minLeft = todoItem.min;
-            if (minLeft > 0 && timeLeft === 0) {
-              minLeft -= 1;
-              timeLeft = 59;
+    const { isPlaying } = this.state;
+    if (!isPlaying) {
+      this.timer = setInterval(() => {
+        this.setState((prevState) => {
+          const updateTodo = prevState.todoData.map((todoItem) => {
+            if (todoItem.id === id) {
+              let timeLeft = todoItem.sec - 1;
+              let minLeft = todoItem.min;
+              if (minLeft > 0 && timeLeft === 0) {
+                minLeft -= 1;
+                timeLeft = 59;
+              }
+              if (timeLeft === 0 || timeLeft < 0) {
+                timeLeft = 0;
+                this.stopTimer();
+              }
+              return {
+                ...todoItem,
+                sec: timeLeft,
+                min: minLeft,
+              };
             }
-            if (timeLeft === 0 || timeLeft < 0) {
-              timeLeft = 0;
-              this.stopTimer();
-            }
-            return {
-              ...todoItem,
-              sec: timeLeft,
-              min: minLeft,
-            };
-          }
-          return todoItem;
+            return todoItem;
+          });
+          return {
+            todoData: updateTodo,
+            isPlaying: true,
+          };
         });
-        return {
-          todoData: updateTodo,
-        };
-      });
-    }, 1000);
+      }, 1000);
+    }
   };
 
   handleChange = (e) => {
