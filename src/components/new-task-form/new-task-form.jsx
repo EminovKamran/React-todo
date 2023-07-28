@@ -23,6 +23,7 @@ function NewTaskForm(props) {
           name='min'
           onChange={handleChange}
           value={min}
+          pattern='^(?:[1-9]|[1-5][0-9]|60)$'
           required
         />
         <input
@@ -31,6 +32,7 @@ function NewTaskForm(props) {
           name='sec'
           onChange={handleChange}
           value={sec}
+          pattern='^(?:[1-9]|[1-5][0-9]|60)$'
           required
         />
         <button type='submit' aria-label='submit-button' />
