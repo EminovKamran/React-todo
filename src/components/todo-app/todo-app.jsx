@@ -10,8 +10,6 @@ export default class TodoApp extends Component {
   // eslint-disable-next-line react/no-unused-class-component-methods
   maxId = 10;
 
-  timer;
-
   constructor(props) {
     super(props);
 
@@ -21,21 +19,26 @@ export default class TodoApp extends Component {
       label: '',
       min: '',
       sec: '',
-      isPlaying: false,
     };
   }
 
-  stopTimer = () => {
-    this.setState({
-      isPlaying: false,
+  stopTimer = (id) => {
+    const { timerId } = this.state.todoData.find((el) => el.id === id);
+    this.setState(({ todoData }) => {
+      const idx = todoData.findIndex((el) => el.id === id);
+      const updatedTodos = [...todoData];
+      updatedTodos[idx].isPlaying = false;
+      return {
+        todoData: updatedTodos,
+      };
     });
-    clearInterval(this.timer);
+    clearInterval(timerId);
   };
 
   startTimer = (id) => {
-    const { isPlaying } = this.state;
+    const { isPlaying } = this.state.todoData.find((el) => el.id === id);
     if (!isPlaying) {
-      this.timer = setInterval(() => {
+      const timerId = setInterval(() => {
         this.setState((prevState) => {
           const updateTodo = prevState.todoData.map((todoItem) => {
             if (todoItem.id === id) {
@@ -59,10 +62,18 @@ export default class TodoApp extends Component {
           });
           return {
             todoData: updateTodo,
-            isPlaying: true,
           };
         });
       }, 1000);
+      this.setState(({ todoData }) => {
+        const idx = todoData.findIndex((el) => el.id === id);
+        const updatedTodos = [...todoData];
+        updatedTodos[idx].timerId = timerId;
+        updatedTodos[idx].isPlaying = true;
+        return {
+          todoData: updatedTodos,
+        };
+      });
     }
   };
 
@@ -80,6 +91,8 @@ export default class TodoApp extends Component {
     createDate: new Date(),
     min,
     sec,
+    timerId: null,
+    isPlaying: false,
   });
 
   // eslint-disable-next-line class-methods-use-this
