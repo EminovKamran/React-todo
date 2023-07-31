@@ -50,7 +50,7 @@ export default class TodoApp extends Component {
               }
               if (timeLeft === 0 || timeLeft < 0) {
                 timeLeft = 0;
-                this.stopTimer();
+                this.stopTimer(id);
               }
               return {
                 ...todoItem,
