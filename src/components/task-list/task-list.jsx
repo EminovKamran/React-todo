@@ -10,7 +10,7 @@ function TaskList(props) {
     onToggleStatus,
     onDeleted,
     onEdit,
-    useEditTask,
+    setEditTask,
     startTimer,
     stopTimer,
   } = props;
@@ -26,7 +26,7 @@ function TaskList(props) {
           onToggleStatus={() => onToggleStatus(id)}
           onDeleted={() => onDeleted(id)}
           onEdit={() => onEdit(id)}
-          useEditTask={useEditTask}
+          setEditTask={setEditTask}
           description={description}
           startTimer={() => startTimer(id)}
           stopTimer={() => stopTimer(id)}

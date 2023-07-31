@@ -17,7 +17,7 @@ function Task(props) {
     startTimer,
     stopTimer,
     id,
-    useEditTask,
+    setEditTask,
   } = props;
 
   const [newLabel, setNewLabel] = useState(description);
@@ -29,8 +29,7 @@ function Task(props) {
 
   const onTaskEdit = (e) => {
     e.preventDefault();
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEditTask(id, newLabel);
+    setEditTask(id, newLabel);
   };
 
   return (

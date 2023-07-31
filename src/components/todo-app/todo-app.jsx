@@ -12,8 +12,7 @@ function TodoApp() {
   const [label, setLabel] = useState('');
   const [min, setMin] = useState('');
   const [sec, setSec] = useState('');
-
-  let maxId = 10;
+  const [maxId, setMaxId] = useState(10);
 
   const stopTimer = (id) => {
     const { timerId } = todoData.find((el) => el.id === id);
@@ -74,7 +73,8 @@ function TodoApp() {
   const createTodoItem = (description, min, sec) => ({
     description,
     state: 'active',
-    id: (maxId += 1),
+    // eslint-disable-next-line no-plusplus
+    id: maxId,
     createDate: new Date(),
     min,
     sec,
@@ -90,13 +90,13 @@ function TodoApp() {
   };
 
   const onToggleStatus = (id) => {
-    setTodoData((prevTodoData) => toggleProperty(prevTodoData, id));
+    setTodoData(() => toggleProperty(todoData, id));
   };
 
   const onDeleted = (id) => {
-    setTodoData((prevTodoData) => {
-      const idx = prevTodoData.findIndex((el) => el.id === id);
-      return [...prevTodoData.slice(0, idx), ...prevTodoData.slice(idx + 1)];
+    setTodoData(() => {
+      const idx = todoData.findIndex((el) => el.id === id);
+      return [...todoData.slice(0, idx), ...todoData.slice(idx + 1)];
     });
   };
 
@@ -104,7 +104,8 @@ function TodoApp() {
   const addItem = (text, min, sec) => {
     if (text.trim()) {
       const newItem = createTodoItem(text, min, sec);
-      setTodoData((prevTodoData) => [...prevTodoData, newItem]);
+      setTodoData(() => [...todoData, newItem]);
+      setMaxId(() => maxId + 1);
     }
   };
 
@@ -125,9 +126,7 @@ function TodoApp() {
   };
 
   const useClearCompleted = () => {
-    setTodoData((prevTodoData) =>
-      prevTodoData.filter((el) => el.state !== 'completed'),
-    );
+    setTodoData(() => todoData.filter((el) => el.state !== 'completed'));
   };
 
   const useNewTask = (e) => {
@@ -139,17 +138,17 @@ function TodoApp() {
   };
 
   const onEdit = (id) => {
-    setTodoData((prevTodoData) => {
-      const idx = prevTodoData.findIndex((el) => el.id === id);
-      const updatedTodos = [...prevTodoData];
+    setTodoData(() => {
+      const idx = todoData.findIndex((el) => el.id === id);
+      const updatedTodos = [...todoData];
       updatedTodos[idx].state = 'editing';
       return updatedTodos;
     });
   };
 
-  const useEditTask = (id, newLabel) => {
-    setTodoData((prevTodoData) =>
-      prevTodoData.map((elem) => {
+  const setEditTask = (id, newLabel) => {
+    setTodoData(() =>
+      todoData.map((elem) => {
         if (elem.id === id) {
           return {
             ...elem,
@@ -180,7 +179,7 @@ function TodoApp() {
           onToggleStatus={onToggleStatus}
           onDeleted={onDeleted}
           onEdit={onEdit}
-          useEditTask={useEditTask}
+          setEditTask={setEditTask}
           handleChange={handleChange}
           min={min}
           sec={sec}
