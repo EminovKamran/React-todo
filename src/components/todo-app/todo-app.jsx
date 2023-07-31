@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 
 import NewTaskForm from '../new-task-form';
 import TaskList from '../task-list';
@@ -6,41 +6,32 @@ import Footer from '../footer';
 
 import './todo-app.css';
 
-export default class TodoApp extends Component {
-  // eslint-disable-next-line react/no-unused-class-component-methods
-  maxId = 10;
+function TodoApp() {
+  const [todoData, setTodoData] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [label, setLabel] = useState('');
+  const [min, setMin] = useState('');
+  const [sec, setSec] = useState('');
 
-  constructor(props) {
-    super(props);
+  let maxId = 10;
 
-    this.state = {
-      todoData: [],
-      filter: 'all',
-      label: '',
-      min: '',
-      sec: '',
-    };
-  }
-
-  stopTimer = (id) => {
-    const { timerId } = this.state.todoData.find((el) => el.id === id);
-    this.setState(({ todoData }) => {
-      const idx = todoData.findIndex((el) => el.id === id);
-      const updatedTodos = [...todoData];
+  const stopTimer = (id) => {
+    const { timerId } = todoData.find((el) => el.id === id);
+    setTodoData((prevTodoData) => {
+      const idx = prevTodoData.findIndex((el) => el.id === id);
+      const updatedTodos = [...prevTodoData];
       updatedTodos[idx].isPlaying = false;
-      return {
-        todoData: updatedTodos,
-      };
+      return updatedTodos;
     });
     clearInterval(timerId);
   };
 
-  startTimer = (id) => {
-    const { isPlaying } = this.state.todoData.find((el) => el.id === id);
+  const startTimer = (id) => {
+    const { isPlaying } = todoData.find((el) => el.id === id);
     if (!isPlaying) {
       const timerId = setInterval(() => {
-        this.setState((prevState) => {
-          const updateTodo = prevState.todoData.map((todoItem) => {
+        setTodoData((prevTodoData) =>
+          prevTodoData.map((todoItem) => {
             if (todoItem.id === id) {
               let timeLeft = todoItem.sec - 1;
               let minLeft = todoItem.min;
@@ -50,7 +41,7 @@ export default class TodoApp extends Component {
               }
               if (timeLeft === 0 || timeLeft < 0) {
                 timeLeft = 0;
-                this.stopTimer(id);
+                stopTimer(id);
               }
               return {
                 ...todoItem,
@@ -59,35 +50,31 @@ export default class TodoApp extends Component {
               };
             }
             return todoItem;
-          });
-          return {
-            todoData: updateTodo,
-          };
-        });
+          }),
+        );
       }, 1000);
-      this.setState(({ todoData }) => {
-        const idx = todoData.findIndex((el) => el.id === id);
-        const updatedTodos = [...todoData];
+      setTodoData((prevTodoData) => {
+        const idx = prevTodoData.findIndex((el) => el.id === id);
+        const updatedTodos = [...prevTodoData];
         updatedTodos[idx].timerId = timerId;
         updatedTodos[idx].isPlaying = true;
-        return {
-          todoData: updatedTodos,
-        };
+        return updatedTodos;
       });
     }
   };
 
-  handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    if (name === 'label') setLabel(value);
+    else if (name === 'min') setMin(value);
+    else if (name === 'sec') setSec(value);
   };
 
-  // eslint-disable-next-line no-return-assign
-  createTodoItem = (description, min, sec) => ({
+  // eslint-disable-next-line no-shadow,no-return-assign
+  const createTodoItem = (description, min, sec) => ({
     description,
     state: 'active',
-    // eslint-disable-next-line react/no-unused-class-component-methods
-    id: (this.maxId += 1),
+    id: (maxId += 1),
     createDate: new Date(),
     min,
     sec,
@@ -95,56 +82,39 @@ export default class TodoApp extends Component {
     isPlaying: false,
   });
 
-  // eslint-disable-next-line class-methods-use-this
-  toggleProperty = (arr, id) => {
+  const toggleProperty = (arr, id) => {
     const idx = arr.findIndex((el) => el.id === id);
-
     const obj = { ...arr[idx] };
-
     obj.state = obj.state === 'active' ? 'completed' : 'active';
-
     return [...arr.slice(0, idx), obj, ...arr.slice(idx + 1)];
   };
 
-  onToggleStatus = (id) => {
-    this.setState(({ todoData }) => ({
-      todoData: this.toggleProperty(todoData, id),
-    }));
+  const onToggleStatus = (id) => {
+    setTodoData((prevTodoData) => toggleProperty(prevTodoData, id));
   };
 
-  onDeleted = (id) => {
-    this.setState(({ todoData }) => {
-      const idx = todoData.findIndex((el) => el.id === id);
-
-      const newArray = [...todoData.slice(0, idx), ...todoData.slice(idx + 1)];
-
-      return {
-        todoData: newArray,
-      };
+  const onDeleted = (id) => {
+    setTodoData((prevTodoData) => {
+      const idx = prevTodoData.findIndex((el) => el.id === id);
+      return [...prevTodoData.slice(0, idx), ...prevTodoData.slice(idx + 1)];
     });
   };
 
-  addItem = (text, min, sec) => {
+  // eslint-disable-next-line no-shadow
+  const addItem = (text, min, sec) => {
     if (text.trim()) {
-      const newItem = this.createTodoItem(text, min, sec);
-
-      this.setState(({ todoData }) => {
-        const newArr = [...todoData, newItem];
-
-        return {
-          todoData: newArr,
-        };
-      });
+      const newItem = createTodoItem(text, min, sec);
+      setTodoData((prevTodoData) => [...prevTodoData, newItem]);
     }
   };
 
-  useFilteredTask = (e) => {
+  const useFilteredTask = (e) => {
+    // eslint-disable-next-line no-shadow
     const filter = e.target.innerText.toLowerCase();
-    this.setState({ filter });
+    setFilter(filter);
   };
 
-  getFilteredTasks = () => {
-    const { todoData, filter } = this.state;
+  const getFilteredTasks = () => {
     if (filter === 'active') {
       return todoData.filter((el) => el.state === 'active');
     }
@@ -154,42 +124,32 @@ export default class TodoApp extends Component {
     return todoData;
   };
 
-  useClearCompleted = () => {
-    this.setState(({ todoData }) => {
-      const newTodoData = todoData.filter((el) => el.state !== 'completed');
-
-      return {
-        todoData: newTodoData,
-      };
-    });
+  const useClearCompleted = () => {
+    setTodoData((prevTodoData) =>
+      prevTodoData.filter((el) => el.state !== 'completed'),
+    );
   };
 
-  useNewTask = (e) => {
+  const useNewTask = (e) => {
     e.preventDefault();
-    const { label, min, sec } = this.state;
-    this.addItem(label, min, sec);
-    this.setState({
-      label: '',
-      min: '',
-      sec: '',
-    });
+    addItem(label, min, sec);
+    setLabel('');
+    setMin('');
+    setSec('');
   };
 
-  onEdit = (id) => {
-    this.setState(({ todoData }) => {
-      const idx = todoData.findIndex((el) => el.id === id);
-      const updatedTodos = [...todoData];
+  const onEdit = (id) => {
+    setTodoData((prevTodoData) => {
+      const idx = prevTodoData.findIndex((el) => el.id === id);
+      const updatedTodos = [...prevTodoData];
       updatedTodos[idx].state = 'editing';
-
-      return {
-        todoData: updatedTodos,
-      };
+      return updatedTodos;
     });
   };
 
-  useEditTask = (id, newLabel) => {
-    this.setState(({ todoData }) => {
-      const updateLabel = todoData.map((elem) => {
+  const useEditTask = (id, newLabel) => {
+    setTodoData((prevTodoData) =>
+      prevTodoData.map((elem) => {
         if (elem.id === id) {
           return {
             ...elem,
@@ -198,52 +158,44 @@ export default class TodoApp extends Component {
           };
         }
         return elem;
-      });
-
-      return {
-        todoData: updateLabel,
-        newLabel: '',
-      };
-    });
+      }),
+    );
   };
 
-  render() {
-    const { filter, label, todoData, min, sec } = this.state;
+  const todoCount = todoData.filter((el) => el.state === 'active').length;
+  const filteredTasks = getFilteredTasks();
 
-    const todoCount = todoData.filter((el) => el.state === 'active').length;
-
-    const filteredTasks = this.getFilteredTasks();
-
-    return (
-      <section className='todoapp'>
-        <NewTaskForm
-          handleChange={this.handleChange}
-          useNewTask={this.useNewTask}
-          label={label}
+  return (
+    <section className='todoapp'>
+      <NewTaskForm
+        handleChange={handleChange}
+        useNewTask={useNewTask}
+        label={label}
+        min={min}
+        sec={sec}
+      />
+      <section className='main'>
+        <TaskList
+          todos={filteredTasks}
+          onToggleStatus={onToggleStatus}
+          onDeleted={onDeleted}
+          onEdit={onEdit}
+          useEditTask={useEditTask}
+          handleChange={handleChange}
           min={min}
           sec={sec}
+          startTimer={startTimer}
+          stopTimer={stopTimer}
         />
-        <section className='main'>
-          <TaskList
-            todos={filteredTasks}
-            onToggleStatus={this.onToggleStatus}
-            onDeleted={this.onDeleted}
-            onEdit={this.onEdit}
-            useEditTask={this.useEditTask}
-            handleChange={this.handleChange}
-            min={min}
-            sec={sec}
-            startTimer={this.startTimer}
-            stopTimer={this.stopTimer}
-          />
-          <Footer
-            useFilteredTask={this.useFilteredTask}
-            currentFilter={filter}
-            useClearCompleted={this.useClearCompleted}
-            todoCount={todoCount}
-          />
-        </section>
+        <Footer
+          useFilteredTask={useFilteredTask}
+          currentFilter={filter}
+          useClearCompleted={useClearCompleted}
+          todoCount={todoCount}
+        />
       </section>
-    );
-  }
+    </section>
+  );
 }
+
+export default TodoApp;

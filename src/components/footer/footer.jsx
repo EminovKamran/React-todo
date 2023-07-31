@@ -4,12 +4,9 @@ import TasksFilter from '../tasks-filter';
 
 import './footer.css';
 
-function Footer({
-  useFilteredTask,
-  currentFilter,
-  useClearCompleted,
-  todoCount,
-}) {
+function Footer(props) {
+  const { useFilteredTask, currentFilter, useClearCompleted, todoCount } =
+    props;
   return (
     <footer className='footer'>
       <span>items</span>
