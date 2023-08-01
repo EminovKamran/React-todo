@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import NewTaskForm from '../new-task-form';
 import TaskList from '../task-list';
@@ -13,6 +13,27 @@ function TodoApp() {
   const [min, setMin] = useState('');
   const [sec, setSec] = useState('');
   const [maxId, setMaxId] = useState(10);
+
+  const taskContainerRef = useRef(null);
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      const taskContainer = taskContainerRef.current;
+
+      if (!taskContainer.contains(event.target)) {
+        const tasksWithoutEditing = todoData.map((task) =>
+          task.state === 'editing' ? { ...task, state: 'active' } : task,
+        );
+        setTodoData(tasksWithoutEditing);
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, [todoData]);
 
   const stopTimer = (id) => {
     const { timerId } = todoData.find((el) => el.id === id);
@@ -69,11 +90,9 @@ function TodoApp() {
     else if (name === 'sec') setSec(value);
   };
 
-  // eslint-disable-next-line no-shadow,no-return-assign
-  const createTodoItem = (description, min, sec) => ({
+  const createTodoItem = (description) => ({
     description,
     state: 'active',
-    // eslint-disable-next-line no-plusplus
     id: maxId,
     createDate: new Date(),
     min,
@@ -100,19 +119,17 @@ function TodoApp() {
     });
   };
 
-  // eslint-disable-next-line no-shadow
-  const addItem = (text, min, sec) => {
+  const addItem = (text, newMin, newSec) => {
     if (text.trim()) {
-      const newItem = createTodoItem(text, min, sec);
+      const newItem = createTodoItem(text, newMin, newSec);
       setTodoData(() => [...todoData, newItem]);
       setMaxId(() => maxId + 1);
     }
   };
 
   const useFilteredTask = (e) => {
-    // eslint-disable-next-line no-shadow
-    const filter = e.target.innerText.toLowerCase();
-    setFilter(filter);
+    const filtered = e.target.innerText.toLowerCase();
+    setFilter(filtered);
   };
 
   const getFilteredTasks = () => {
@@ -161,6 +178,17 @@ function TodoApp() {
     );
   };
 
+  const resetTodo = (e) => {
+    setTodoData(() =>
+      todoData.map((el) => {
+        if (e.keyCode === 27) {
+          return { ...el, state: 'active' };
+        }
+        return el;
+      }),
+    );
+  };
+
   const todoCount = todoData.filter((el) => el.state === 'active').length;
   const filteredTasks = getFilteredTasks();
 
@@ -173,7 +201,7 @@ function TodoApp() {
         min={min}
         sec={sec}
       />
-      <section className='main'>
+      <section className='main' ref={taskContainerRef}>
         <TaskList
           todos={filteredTasks}
           onToggleStatus={onToggleStatus}
@@ -185,6 +213,7 @@ function TodoApp() {
           sec={sec}
           startTimer={startTimer}
           stopTimer={stopTimer}
+          resetTodo={resetTodo}
         />
         <Footer
           useFilteredTask={useFilteredTask}

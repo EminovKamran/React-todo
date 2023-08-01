@@ -18,6 +18,7 @@ function Task(props) {
     stopTimer,
     id,
     setEditTask,
+    resetTodo,
   } = props;
 
   const [newLabel, setNewLabel] = useState(description);
@@ -75,6 +76,7 @@ function Task(props) {
             type='text'
             name='newLabel'
             className='edit'
+            onKeyDown={resetTodo}
             value={newLabel}
             onChange={handleChange}
           />

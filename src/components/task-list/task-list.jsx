@@ -13,6 +13,7 @@ function TaskList(props) {
     setEditTask,
     startTimer,
     stopTimer,
+    resetTodo,
   } = props;
 
   const elements = todos.map((item) => {
@@ -30,6 +31,7 @@ function TaskList(props) {
           description={description}
           startTimer={() => startTimer(id)}
           stopTimer={() => stopTimer(id)}
+          resetTodo={(e) => resetTodo(e, id)}
         />
       </li>
     );
